@@ -1,0 +1,22 @@
+{
+  "name": "eventvite-backend",
+  "version": "1.0.0",
+  "description": "backend for eventvite the app that send ivitation remainder to contact",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carloszaep/EventVite-backend.git"
+  },
+  "author": "Carlos P and Juan Carlos Garcia",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/carloszaep/EventVite-backend/issues"
+  },
+  "homepage": "https://github.com/carloszaep/EventVite-backend#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
