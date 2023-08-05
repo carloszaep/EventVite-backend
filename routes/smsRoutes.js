@@ -1,9 +1,8 @@
 import express from "express";
+import { sendSms } from "../controllers/smsController.js";
 
 const router = express.Router();
 
-router.route("/sendSms").get((req, res, next) => {
-  res.status(200).json({ ok: "hello" });
-});
+router.route("/sendSms").post(sendSms);
 
 export default router;

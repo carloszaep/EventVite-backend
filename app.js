@@ -7,8 +7,20 @@ import cookieParser from "cookie-parser";
 import { AppError } from "./utils/appError.js";
 import errorController from "./controllers/errorController.js";
 import smsRoutes from "./routes/smsRoutes.js";
+import bodyParser from "body-parser";
+
+// for now
+import cors from "cors";
 
 const app = express();
+
+// for now
+// Enable CORS for all routes
+app.use(cors());
+
+// body parser
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // security middleware
 express.json({ limit: "10kb" });
