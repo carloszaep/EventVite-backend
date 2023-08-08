@@ -1,9 +1,11 @@
 import { AppError } from '../utils/appError.js'
-import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
+import { createToken } from '../utils/createToken.js'
 import { promisify } from 'util'
 import User from '../models/usersModel.js'
 import { sendSms } from '../utils/sendSms.js'
+import { validateUser } from '../schemas/userSchema.js'
+import { validateLogin, validatePhone } from '../schemas/loginSchema.js'
 
 const signToken = id =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -32,16 +34,19 @@ const createAndSendToken = (user, statusCode, res) => {
 
 export const signup = async (req, res, next) => {
   try {
+    const result = validateUser(req.body)
+    if (!result.success) {
+      return res.status(400).json(JSON.parse(result.error.message))
+    }
     // set a token to save as verifyToken
-    const token = crypto.randomBytes(8).toString('hex').toUpperCase()
+    const token = createToken()
     // create the user
-    const newUser = await User.create({
-      verificationToken: token,
-      phone: req.body.phone,
-      name: req.body.name
+    const user = await User.create({
+      verificationToken: token, ...result.data
     })
 
-    await sendSms(token, newUser.phone)
+    // send token to user
+    await sendSms(token, user.phone)
 
     res
       .status(201)
@@ -53,7 +58,12 @@ export const signup = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { phone, token } = req.body
+    const result = validateLogin(req.body)
+    if (!result.success) {
+      return res.status(400).json(JSON.parse(result.error.message))
+    }
+
+    const { phone, token } = result.data
     // set a token to save as verifyToken
     const user = await User.findOne({ phone }).select('+verificationToken')
     if (!user) throw new AppError('no user found', 404)
@@ -68,11 +78,40 @@ export const login = async (req, res, next) => {
   }
 }
 
+export const resendToken = async (req, res, next) => {
+  try {
+    const result = validatePhone(req.body)
+
+    if (!result.success) {
+      return res.status(400).json(JSON.parse(result.error.message))
+    }
+
+    const { phone } = result.data
+
+    // set a token to save as verifyToken
+    const user = await User.findOne({ phone }).select('+verificationToken')
+    if (!user) throw new AppError('no user found', 404)
+
+    // set a token to save as verifyToken
+    const token = createToken()
+    user.verificationToken = token
+
+    await user.save()
+
+    await sendSms(token, user.phone)
+
+    res
+      .status(201)
+      .json({ data: { message: 'new token was send' } })
+  } catch (err) {
+    next(err)
+  }
+}
+
 // middleware function
 export const protect = async (req, res, next) => {
   try {
     // check for the token in the header
-
     const { token } = req.cookies
 
     if (!token) throw new AppError('you are no login, please login', 401)
@@ -88,29 +127,6 @@ export const protect = async (req, res, next) => {
     // grant access to protected route
     req.user = currentUser
     next()
-  } catch (err) {
-    next(err)
-  }
-}
-
-export const resendToken = async (req, res, next) => {
-  try {
-    const { phone } = req.body
-    // set a token to save as verifyToken
-    const user = await User.findOne({ phone }).select('+verificationToken')
-    if (!user) throw new AppError('no user found', 404)
-
-    // set a token to save as verifyToken
-    const token = crypto.randomBytes(8).toString('hex').toUpperCase()
-    user.verificationToken = token
-
-    await user.save()
-
-    await sendSms(token, user.phone)
-
-    res
-      .status(201)
-      .json({ data: { message: 'new token was send' } })
   } catch (err) {
     next(err)
   }

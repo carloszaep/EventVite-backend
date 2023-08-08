@@ -7,7 +7,7 @@ import {
   protect
 
 } from '../controllers/authController.js'
-import { getMe } from '../controllers/userController.js'
+import { updateMe, getMe } from '../controllers/userController.js'
 
 const router = express.Router()
 
@@ -18,5 +18,6 @@ router.post('/resendToken', resendToken)
 
 // user relate
 router.get('/getMe', protect, getMe)
+router.patch('/updateMe', protect, updateMe)
 
 export default router

@@ -2,7 +2,7 @@ import express from 'express'
 import {
   confirmContact, createEvents, deleteEvent,
   updateEvent, getEvent, addContact, deleteContact,
-  sendSmsToContact
+  sendInvitation, protectEvent, sendPendingInvitations
 } from '../controllers/eventsController.js'
 import { protect } from '../controllers/authController.js'
 
@@ -14,14 +14,15 @@ router.post('/createEvent', protect, createEvents)
 // contact related
 router.route('/:eventId/:contactId')
   .get(confirmContact)
-  .patch(protect, deleteContact)
-  .post(protect, sendSmsToContact)
+  .delete(protect, protectEvent, deleteContact)
+  .post(protect, protectEvent, sendInvitation)
 
 // get and mod events
 router.route('/:eventId')
-  .get(protect, getEvent)
-  .delete(protect, deleteEvent)
-  .patch(protect, updateEvent)
-  .put(protect, addContact)
+  .get(protect, protectEvent, getEvent)
+  .delete(protect, protectEvent, deleteEvent)
+  .patch(protect, protectEvent, updateEvent)
+  .put(protect, protectEvent, addContact)
+  .post(protect, protectEvent, sendPendingInvitations)
 
 export default router

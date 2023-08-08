@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { AppError } from '../utils/appError.js'
 
 const eventsSchema = new mongoose.Schema(
   {
@@ -17,9 +18,19 @@ const eventsSchema = new mongoose.Schema(
       ref: 'User',
       required: [true, 'need a user ']
     },
+    address: {
+      type: String
+    },
+
     eventDate: {
       type: Date,
-      required: [true, 'please add date to event']
+      required: [true, 'please add date to event'],
+      validate: {
+        validator: function (value) {
+          return value > new Date() // Check if the eventDate is in the future
+        },
+        message: 'eventDate must be set to a future date and time'
+      }
     },
     contacts: [{
       name: {
@@ -36,7 +47,9 @@ const eventsSchema = new mongoose.Schema(
             return /^(\+1)/.test(val)
           },
           message: 'phone number had to start with +1'
-        }
+        },
+        maxlength: [12, 'no more that 12'],
+        minlength: [12, 'no less that 12']
       },
       notify: { type: Boolean, default: false },
       confirmed: { type: Boolean, default: false }
@@ -44,6 +57,30 @@ const eventsSchema = new mongoose.Schema(
   }
 
 )
+
+// Instance method to delete a contact
+eventsSchema.methods.deleteContact = async function (contactId) {
+  try {
+    const contactIndex = this.contacts.findIndex((contact) => contact.id === contactId)
+    if (contactIndex !== -1) {
+      this.contacts.splice(contactIndex, 1)
+      await this.save()
+    } else {
+      throw new AppError('Contact not found', 404)
+    }
+  } catch (error) {
+    throw new AppError(error.message, 404)
+  }
+}
+// Instance method to add a contact
+eventsSchema.methods.addContact = async function (contactData) {
+  try {
+    this.contacts.push(contactData)
+    await this.save()
+  } catch (error) {
+    throw new AppError(error.message, 404)
+  }
+}
 
 const EventsApp = mongoose.model('EventsApp', eventsSchema)
 
