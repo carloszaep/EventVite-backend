@@ -1,10 +1,10 @@
 import dotenv from 'dotenv'
 import { AppError } from '../utils/appError.js'
-import Twilio from 'twilio'
+// import Twilio from 'twilio'
 
 dotenv.config({ path: './conf.env' })
 
-const client = Twilio(process.env.twilioSid, process.env.twilioToken)
+// const client = Twilio(process.env.twilioSid, process.env.twilioToken)
 
 export const sendSms = async (sms, toPhoneNumber) => {
   try {

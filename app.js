@@ -9,6 +9,7 @@ import { AppError } from './utils/appError.js'
 import errorController from './controllers/errorController.js'
 import userRoutes from './routes/userRouter.js'
 import eventRoutes from './routes/eventRoutes.js'
+import compression from 'compression'
 import cors from 'cors'
 
 const app = express()
@@ -47,6 +48,8 @@ app.use(xss())
 app.use(hpp())
 app.use(cookieParser())
 
+// compress
+app.use(compression())
 // Define your routes
 app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/events', eventRoutes)
