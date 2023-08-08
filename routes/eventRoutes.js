@@ -1,5 +1,9 @@
 import express from 'express'
-import { confirmContact, createEvents, deleteEvent, updateEvent, getEvent, addContact, deleteContact, sendSmsToContact } from '../controllers/eventsController.js'
+import {
+  confirmContact, createEvents, deleteEvent,
+  updateEvent, getEvent, addContact, deleteContact,
+  sendSmsToContact
+} from '../controllers/eventsController.js'
 import { protect } from '../controllers/authController.js'
 
 const router = express.Router()

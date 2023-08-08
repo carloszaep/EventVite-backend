@@ -16,7 +16,7 @@ mongoose
   })
   .catch((err) => console.error(err))
 
-const PORT = 3000
+const PORT = process.env.PORT ?? 1234
 
 app.listen(PORT, () => {
   console.log(`your app is running on port ${PORT}`)
