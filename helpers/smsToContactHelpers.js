@@ -24,11 +24,9 @@ export const sendInvitationSms = async (user, event, contact, req) => {
   const contactId = contact.id
 
   const confirmationLink = generateConfirmationLink(req, eventId, contactId)
-  const htmlConfirmationLink = `<a href="${confirmationLink}">Confirm</a>`
+  // const htmlConfirmationLink = `<a href="${confirmationLink}">Confirm</a>`
 
-  const htmlMessage = `
-    Hello ${contactName}, ${user.name} just invited you to the event: ${event.name},
-    on ${formattedEventDate},${event.address ? ` at ${event.address},` : ''} please confirm if you're going by visiting this link: ${htmlConfirmationLink}`
+  const htmlMessage = `Hello ${contactName}, ${user.name} just invited you to the event: ${event.name}, on ${formattedEventDate},${event.address ? ` at ${event.address},` : ''} please confirm if you're going by visiting this link: ${confirmationLink}`
 
   const sentSms = await sendSms(htmlMessage, contactPhone)
 

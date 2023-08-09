@@ -1,24 +1,34 @@
 import dotenv from 'dotenv'
 import { AppError } from '../utils/appError.js'
-// import Twilio from 'twilio'
+import fetch from 'node-fetch'
 
 dotenv.config({ path: './conf.env' })
+// Find your Service Plan ID and API Token at dashboard.sinch.com/sms/api/rest
+// Find your Sinch numbers at dashboard.sinch.com/numbers/your-numbers/numbers
+const SERVICE_PLAN_ID = process.env.SERVICE_PLAN_ID
+const API_TOKEN = process.env.API_TOKEN
+const SINCH_NUMBER = process.env.SINCH_NUMBER
 
-// const client = Twilio(process.env.twilioSid, process.env.twilioToken)
-
-export const sendSms = async (sms, toPhoneNumber) => {
+export const sendSms = async (smsText, toPhoneNumber) => {
   try {
-    const sendedSms = 'sms sended to consoled.log'
+    const resp = await fetch(
+      'https://us.sms.api.sinch.com/xms/v1/' + SERVICE_PLAN_ID + '/batches',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + API_TOKEN
+        },
+        body: JSON.stringify({
+          from: SINCH_NUMBER,
+          to: ['+17866161600'],
+          body: smsText
+        })
+      }
+    )
 
-    console.log(sms)
-
-    // const sendedSms = await client.messages.create({
-    //   body: sms,
-    //   from: '+18664851989',
-    //   to: toPhoneNumber
-    // })
-
-    return sendedSms
+    const data = await resp.json()
+    console.log(data)
   } catch (err) {
     throw new AppError(err.messages, 404)
   }

@@ -113,7 +113,7 @@ export const sendInvitation = async (req, res, next) => {
       throw new AppError('Contact not found', 404)
     }
 
-    if (contact.confirmed) throw new AppError('is already confirmed', 401)
+    // if (contact.confirmed) throw new AppError('is already confirmed', 401)
 
     // send sms to contact
     const isSmsSent = await sendInvitationSms(user, event, contact, req)
