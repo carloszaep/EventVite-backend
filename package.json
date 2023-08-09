@@ -1,6 +1,9 @@
 {
   "name": "eventvite-backend",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=16.15.1"
+  },
   "description": "backend for eventvite the app that send ivitation remainder to contact",
   "main": "index.js",
   "type": "module",
