@@ -2,7 +2,7 @@ import escapeHtml from 'escape-html'
 
 // Helper function to generate the styled HTML confirmation page
 export const generateConfirmationPage = (contact, event) => {
-  const date = new Date(event.date).toLocaleString('en-US', {
+  const date = new Date(event.eventDate).toLocaleString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -25,11 +25,13 @@ export const generateConfirmationPage = (contact, event) => {
             <div class="column is-half spooky_bg2">
             </div>
             <div class="column is-half input_container">
+                <h1>EventVite</h1>
                 <h1>${escapeHtml(contact.name)}, You're Invited!</h1>
                 <h3>We're Delighted to Have You Join Us</h3>
                 <h2>${escapeHtml(event.name)}</h2>
                 <h3>On ${escapeHtml(date)}.</h3>
                 ${event.address ? `<h3>At ${event.address}.</h3>` : ''}               
+                <h2>you just confirmed</h2>
                 <p>Your presence is the missing piece that will make this 
                 event truly special. We can't wait to see you there!</p>               
             </div>
