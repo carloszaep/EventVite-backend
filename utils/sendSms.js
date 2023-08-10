@@ -28,7 +28,8 @@ export const sendSms = async (smsText, toPhoneNumber) => {
     )
 
     const data = await resp.json()
-    console.log(data)
+
+    return data
   } catch (err) {
     throw new AppError(err.messages, 404)
   }
