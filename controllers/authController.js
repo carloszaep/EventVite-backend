@@ -41,12 +41,21 @@ export const login = async (req, res, next) => {
 
     const { phone, token } = result.data
     // set a token to save as verifyToken
-    const user = await User.findOne({ phone }).select('+verificationToken')
-    if (!user) throw new AppError('no user found', 404)
+    const user = await User.findOne({ phone }).select('+verificationToken +active')
+    if (!user) throw new AppError('user or password no correct', 400)
+
+    if (!user.active) throw new AppError('this user was remove', 404)
+
+    if (user.isLocked) {
+      if ((await user.checkLockDown())) throw new AppError('this user is lock', 401)
+    }
 
     if (!(await user.correctToken(token, user.verificationToken))) {
+      await user.failedLogin()
       throw new AppError('user or password no correct', 401)
     }
+
+    await user.resetFailedLoginAttempts()
 
     createAndSendToken(user, 200, res)
   } catch (err) {
@@ -105,5 +114,16 @@ export const protect = async (req, res, next) => {
     next()
   } catch (err) {
     next(err)
+  }
+}
+
+export const logout = async (req, res, next) => {
+  try {
+    res.cookie('token', '', {
+      expires: new Date(0)
+    })
+    res.sendStatus(200)
+  } catch (err) {
+    next(new AppError(err.message, 404))
   }
 }

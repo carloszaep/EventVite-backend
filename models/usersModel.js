@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
+import { calcMinutesSince } from '../helpers/minutesSince.js'
 
 const userSchema = new mongoose.Schema(
   {
@@ -26,6 +27,18 @@ const userSchema = new mongoose.Schema(
     tokenChangeAt: {
       type: Date,
       default: Date.now
+    },
+    failedLoginAttempts: {
+      type: Number,
+      default: 0
+    },
+    lastFailedLogin: {
+      type: Date,
+      default: null
+    },
+    isLocked: {
+      type: Boolean,
+      default: false
     },
 
     active: { type: Boolean, default: true, select: false }
@@ -73,6 +86,48 @@ userSchema.methods.changeTokenAfter = function (JWTTimestamp) {
 
   // false mean NOT change
   return false
+}
+
+userSchema.methods.failedLogin = function () {
+  const now = new Date()
+  if (this.failedLoginAttempts >= process.env.ATTEMPTS_BEFORE_LOCK) {
+    const lastFailedLogin = this.lastFailedLogin || now
+
+    if (calcMinutesSince(lastFailedLogin) <= process.env.MIN_BEFORE_LOCK) {
+      this.isLocked = true
+      return this.save()
+    }
+  }
+
+  this.failedLoginAttempts += 1
+  this.lastFailedLogin = now
+
+  return this.save()
+}
+
+userSchema.methods.checkLockDown = async function () {
+  if (!this.isLocked) return true
+  const now = new Date()
+  const lastFailedLogin = this.lastFailedLogin || now
+
+  if (calcMinutesSince(lastFailedLogin) >= process.env.MIN_BEFORE_UNLOCK) {
+    // reset user locks
+    this.isLocked = false
+    this.failedLoginAttempts = 0
+    this.lastFailedLogin = null
+    // save and return true
+    await this.save()
+    return false
+  } else {
+    return true
+  }
+}
+
+userSchema.methods.resetFailedLoginAttempts = async function () {
+  this.failedLoginAttempts = 0
+  this.lastFailedLogin = null
+
+  await this.save()
 }
 
 const User = mongoose.model('User', userSchema)

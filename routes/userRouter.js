@@ -4,7 +4,8 @@ import {
   signup,
   login,
   resendToken,
-  protect
+  protect,
+  logout
 
 } from '../controllers/authController.js'
 import { updateMe, getMe } from '../controllers/userController.js'
@@ -14,6 +15,7 @@ const router = express.Router()
 // auth related
 router.post('/signup', signup)
 router.post('/login', login)
+router.post('/logout', logout)
 router.post('/resendToken', resendToken)
 
 // user relate
